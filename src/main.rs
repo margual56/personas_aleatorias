@@ -1,8 +1,8 @@
-use chrono::{Days, Months, NaiveDate, Utc};
+use chrono::{NaiveDate, Utc};
 use clap::Parser;
 use date_time_parser::DateParser;
 use json::JsonValue;
-use rand::{prelude::SliceRandom, Rng};
+use random_person::{generate_female, generate_male};
 use std::{collections::HashMap, fs::File, io::Read};
 
 #[derive(Parser, Debug)]
@@ -25,6 +25,13 @@ pub struct Cli {
         default_value = "false"
     )]
     random: bool,
+
+    #[clap(
+        short,
+        long,
+        help = "The sex to generate: 1-Masculine, 2-Feminine. If not present, both will be generated"
+    )]
+    sex: Option<u8>,
 }
 
 fn main() {
@@ -109,104 +116,49 @@ fn main() {
 
     println!("DNI\tNombre\tApellidos\tFecha de nacimiento\tRango de edad");
 
-    for age in male_categories {
-        let dni = random_dni(&dni_letters);
-        let (name, surname1, surname2) = random_name(true, &male, &female, &surnames);
-
-        let mut birthday: NaiveDate;
-        if args.random && rand::thread_rng().gen_bool(0.7) {
-            birthday = start_date
-                .checked_sub_months(Months::new(
-                    (age + rand::thread_rng().gen_range(1..4)) * 12
-                        + rand::thread_rng().gen_range(1..4),
-                ))
-                .unwrap();
-            birthday = birthday
-                .checked_sub_days(Days::new(rand::thread_rng().gen_range(1..28)))
-                .unwrap();
+    if let Some(sex) = args.sex {
+        if sex == 1 {
+            generate_male(
+                male_categories,
+                args.random,
+                &dni_letters,
+                start_date,
+                &male,
+                &female,
+                &surnames,
+            );
+        } else if sex == 2 {
+            generate_female(
+                female_categories,
+                args.random,
+                &dni_letters,
+                start_date,
+                &male,
+                &female,
+                &surnames,
+            );
         } else {
-            birthday = start_date
-                .checked_sub_months(Months::new(age * 12))
-                .unwrap();
+            println!("The sex has to be either 1 (male) or 2 (female)");
+            std::process::exit(1);
         }
-
-        println!(
-            "{}\t{}\t{}\t{}\t{}",
-            dni,
-            name,
-            format!("{} {}", surname1, surname2),
-            birthday.format("%d/%m/%Y"),
-            age
-        );
-    }
-    for age in female_categories {
-        let dni = random_dni(&dni_letters);
-        let (name, surname1, surname2) = random_name(false, &male, &female, &surnames);
-
-        let mut birthday: NaiveDate;
-        if args.random && rand::thread_rng().gen_bool(0.7) {
-            birthday = start_date
-                .checked_sub_months(Months::new(
-                    (age + rand::thread_rng().gen_range(1..4)) * 12
-                        + rand::thread_rng().gen_range(1..4),
-                ))
-                .unwrap();
-            birthday = birthday
-                .checked_sub_days(Days::new(rand::thread_rng().gen_range(1..28)))
-                .unwrap();
-        } else {
-            birthday = start_date
-                .checked_sub_months(Months::new(age * 12))
-                .unwrap();
-        }
-
-        println!(
-            "{}\t{}\t{}\t{}\t{}",
-            dni,
-            name,
-            format!("{} {}", surname1, surname2),
-            birthday.format("%d/%m/%Y"),
-            age
-        );
-    }
-}
-
-fn random_dni(dni_letters: &HashMap<u8, &str>) -> String {
-    let mut dni = String::new();
-    for _ in 0..8 {
-        let number = rand::thread_rng().gen_range(0..=9);
-        dni.push_str(&number.to_string());
-    }
-
-    // takes the dni, converts it to a number and calculates the remainder of the division by 23
-    let dni_number = dni.parse::<u64>().unwrap();
-    let dni_remainder = dni_number % 23;
-
-    dni.push_str(dni_letters.get(&(dni_remainder as u8)).unwrap());
-
-    dni
-}
-
-fn random_name(
-    is_male: bool,
-    male: &Vec<String>,
-    female: &Vec<String>,
-    surnames: &Vec<String>,
-) -> (String, String, String) {
-    let name: &String;
-
-    if is_male {
-        name = male.choose(&mut rand::thread_rng()).unwrap();
     } else {
-        name = female.choose(&mut rand::thread_rng()).unwrap();
+        generate_male(
+            male_categories,
+            args.random,
+            &dni_letters,
+            start_date,
+            &male,
+            &female,
+            &surnames,
+        );
+        generate_female(
+            female_categories,
+            args.random,
+            &dni_letters,
+            start_date,
+            &male,
+            &female,
+            &surnames,
+        );
     }
-
-    let surname1 = surnames.choose(&mut rand::thread_rng()).unwrap();
-    let surname2 = surnames.choose(&mut rand::thread_rng()).unwrap();
-
-    (
-        String::from(name),
-        String::from(surname1),
-        String::from(surname2),
-    )
 }
