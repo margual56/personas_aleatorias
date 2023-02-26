@@ -9,4 +9,5 @@ edition = "2021"
 chrono = "0.4.23"
 clap = { version = "4.1.6", features = ["derive"] }
 date_time_parser = "0.2.0"
+json = "0.12.4"
 rand = "0.8.5"
