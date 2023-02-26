@@ -2,7 +2,7 @@ use chrono::{NaiveDate, Utc};
 use clap::Parser;
 use date_time_parser::DateParser;
 use json::JsonValue;
-use random_person::{generate_female, generate_male};
+use random_person::generate_info;
 use std::{fs::File, io::Read};
 
 #[derive(Parser, Debug)]
@@ -40,6 +40,13 @@ pub struct Cli {
         default_value = "1"
     )]
     number: u32,
+
+    #[clap(
+        short,
+        long,
+        help = "Output just this age. If not present, all ages will be generated"
+    )]
+    age: Option<u32>,
 }
 
 fn main() {
@@ -97,22 +104,28 @@ fn main() {
 
     if let Some(sex) = args.sex {
         if sex == 1 {
-            generate_male(
-                male_categories,
+            // Generate male
+            generate_info(
+                match args.age {
+                    Some(age) => vec![age],
+                    None => male_categories,
+                },
                 args.random,
                 args.number,
                 start_date,
                 &male,
-                &female,
                 &surnames,
             );
         } else if sex == 2 {
-            generate_female(
-                female_categories,
+            // Generate female
+            generate_info(
+                match args.age {
+                    Some(age) => vec![age],
+                    None => female_categories,
+                },
                 args.random,
                 args.number,
                 start_date,
-                &male,
                 &female,
                 &surnames,
             );
@@ -121,21 +134,28 @@ fn main() {
             std::process::exit(1);
         }
     } else {
-        generate_male(
-            male_categories,
+        // Generate male
+        generate_info(
+            match args.age {
+                Some(age) => vec![age],
+                None => male_categories,
+            },
             args.random,
             args.number,
             start_date,
             &male,
-            &female,
             &surnames,
         );
-        generate_female(
-            female_categories,
+
+        // Generate female
+        generate_info(
+            match args.age {
+                Some(age) => vec![age],
+                None => female_categories,
+            },
             args.random,
             args.number,
             start_date,
-            &male,
             &female,
             &surnames,
         );

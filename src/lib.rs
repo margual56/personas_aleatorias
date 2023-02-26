@@ -29,62 +29,18 @@ pub const DNI_LETTERS: phf::Map<u8, &'static str> = phf_map! {
         22u8 => "E",
 };
 
-pub fn generate_male(
-    male_categories: Vec<u32>,
+pub fn generate_info(
+    categories: Vec<u32>,
     is_random: bool,
     times: u32,
     start_date: NaiveDate,
-    male: &Vec<String>,
-    female: &Vec<String>,
+    names: &Vec<String>,
     surnames: &Vec<String>,
 ) {
-    for age in male_categories {
+    for age in categories {
         for _ in 0..times {
             let dni = random_dni();
-            let (name, surname1, surname2) = random_name(true, &male, &female, &surnames);
-
-            let mut birthday: NaiveDate;
-            if is_random && rand::thread_rng().gen_bool(0.7) {
-                birthday = start_date
-                    .checked_sub_months(Months::new(
-                        (age + rand::thread_rng().gen_range(1..4)) * 12
-                            + rand::thread_rng().gen_range(1..4),
-                    ))
-                    .unwrap();
-                birthday = birthday
-                    .checked_sub_days(Days::new(rand::thread_rng().gen_range(1..28)))
-                    .unwrap();
-            } else {
-                birthday = start_date
-                    .checked_sub_months(Months::new(age * 12))
-                    .unwrap();
-            }
-
-            println!(
-                "{}\t{}\t{}\t{}\t{}",
-                dni,
-                name,
-                format!("{} {}", surname1, surname2),
-                birthday.format("%d/%m/%Y"),
-                age
-            );
-        }
-    }
-}
-
-pub fn generate_female(
-    female_categories: Vec<u32>,
-    is_random: bool,
-    times: u32,
-    start_date: NaiveDate,
-    male: &Vec<String>,
-    female: &Vec<String>,
-    surnames: &Vec<String>,
-) {
-    for age in female_categories {
-        for _ in 0..times {
-            let dni = random_dni();
-            let (name, surname1, surname2) = random_name(false, &male, &female, &surnames);
+            let (name, surname1, surname2) = random_name(&names, &surnames);
 
             let mut birthday: NaiveDate;
             if is_random && rand::thread_rng().gen_bool(0.7) {
@@ -131,19 +87,8 @@ fn random_dni() -> String {
     dni
 }
 
-fn random_name(
-    is_male: bool,
-    male: &Vec<String>,
-    female: &Vec<String>,
-    surnames: &Vec<String>,
-) -> (String, String, String) {
-    let name: &String;
-
-    if is_male {
-        name = male.choose(&mut rand::thread_rng()).unwrap();
-    } else {
-        name = female.choose(&mut rand::thread_rng()).unwrap();
-    }
+fn random_name(names: &Vec<String>, surnames: &Vec<String>) -> (String, String, String) {
+    let name = names.choose(&mut rand::thread_rng()).unwrap();
 
     let surname1 = surnames.choose(&mut rand::thread_rng()).unwrap();
     let surname2 = surnames.choose(&mut rand::thread_rng()).unwrap();
