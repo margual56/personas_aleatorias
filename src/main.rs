@@ -41,7 +41,10 @@ fn main() {
         };
 
     let mut buf = String::new();
-    File::open("data.json").unwrap().read_to_string(&mut buf).unwrap();
+    File::open("data.json")
+        .unwrap()
+        .read_to_string(&mut buf)
+        .unwrap();
     let json = match json::parse(&buf) {
         Ok(json) => json,
         Err(e) => {
@@ -50,17 +53,26 @@ fn main() {
         }
     };
 
-    let male = match &json["male"]{
-        JsonValue::Array(arr) => arr.into_iter().map(|v| v.to_string()).collect::<Vec<String>>(),
-        _ => panic!("Expected array")
+    let male = match &json["male"] {
+        JsonValue::Array(arr) => arr
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>(),
+        _ => panic!("Expected array"),
     };
-    let female = match &json["female"]{
-        JsonValue::Array(arr) => arr.into_iter().map(|v| v.to_string()).collect::<Vec<String>>(),
-        _ => panic!("Expected array")
+    let female = match &json["female"] {
+        JsonValue::Array(arr) => arr
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>(),
+        _ => panic!("Expected array"),
     };
-    let surnames = match &json["surnames"]{
-        JsonValue::Array(arr) => arr.into_iter().map(|v| v.to_string()).collect::<Vec<String>>(),
-        _ => panic!("Expected array")
+    let surnames = match &json["surnames"] {
+        JsonValue::Array(arr) => arr
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>(),
+        _ => panic!("Expected array"),
     };
 
     let dni_letters: HashMap<u8, &str> = [
