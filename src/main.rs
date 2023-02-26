@@ -3,7 +3,7 @@ use clap::Parser;
 use date_time_parser::DateParser;
 use json::JsonValue;
 use random_person::{generate_female, generate_male};
-use std::{collections::HashMap, fs::File, io::Read};
+use std::{fs::File, io::Read};
 
 #[derive(Parser, Debug)]
 #[clap(
@@ -32,6 +32,14 @@ pub struct Cli {
         help = "The sex to generate: 1-Masculine, 2-Feminine. If not present, both will be generated"
     )]
     sex: Option<u8>,
+
+    #[clap(
+        short,
+        long,
+        help = "The number of people to generate per category. Default is 1",
+        default_value = "1"
+    )]
+    number: u32,
 }
 
 fn main() {
@@ -82,35 +90,6 @@ fn main() {
         _ => panic!("Expected array"),
     };
 
-    let dni_letters: HashMap<u8, &str> = [
-        (0, "T"),
-        (1, "R"),
-        (2, "W"),
-        (3, "A"),
-        (4, "G"),
-        (5, "M"),
-        (6, "Y"),
-        (7, "F"),
-        (8, "P"),
-        (9, "D"),
-        (10, "X"),
-        (11, "B"),
-        (12, "N"),
-        (13, "J"),
-        (14, "Z"),
-        (15, "S"),
-        (16, "Q"),
-        (17, "V"),
-        (18, "H"),
-        (19, "L"),
-        (20, "C"),
-        (21, "K"),
-        (22, "E"),
-    ]
-    .iter()
-    .cloned()
-    .collect();
-
     let male_categories = vec![18, 35, 40, 45, 50, 55, 60, 65, 70];
     let female_categories = vec![18, 40, 45, 50, 55, 60, 65, 70];
 
@@ -121,7 +100,7 @@ fn main() {
             generate_male(
                 male_categories,
                 args.random,
-                &dni_letters,
+                args.number,
                 start_date,
                 &male,
                 &female,
@@ -131,7 +110,7 @@ fn main() {
             generate_female(
                 female_categories,
                 args.random,
-                &dni_letters,
+                args.number,
                 start_date,
                 &male,
                 &female,
@@ -145,7 +124,7 @@ fn main() {
         generate_male(
             male_categories,
             args.random,
-            &dni_letters,
+            args.number,
             start_date,
             &male,
             &female,
@@ -154,7 +133,7 @@ fn main() {
         generate_female(
             female_categories,
             args.random,
-            &dni_letters,
+            args.number,
             start_date,
             &male,
             &female,
