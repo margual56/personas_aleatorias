@@ -49,7 +49,8 @@ pub struct Cli {
     age: Option<u32>,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Cli::parse();
 
     // parse the first argument to a number
@@ -63,10 +64,16 @@ fn main() {
         };
 
     let mut buf = String::new();
-    File::open("data.json")
-        .unwrap()
-        .read_to_string(&mut buf)
-        .unwrap();
+    match File::open("data.json") {
+        Ok(mut file) => {
+            file.read_to_string(&mut buf).unwrap();
+        },
+        Err(_) => {
+            let result = reqwest::get("https://raw.githubusercontent.com/margual56/personas_aleatorias/main/data.json").await.expect("Couldn't get data");
+            buf = result.text().await.expect("Couldn't get text");
+        }
+    };
+
     let json = match json::parse(&buf) {
         Ok(json) => json,
         Err(e) => {
